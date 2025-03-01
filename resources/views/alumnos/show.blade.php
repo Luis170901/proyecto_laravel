@@ -44,8 +44,7 @@
             </div>
             <div class="flex flex-row justify-between p-3">
                 <button class="btn btn-warning" type="submit">Guardar</button>
-                <button class="btn btn-warning" type="submit">Cancelar</button>
-
+                <a href="{{ route('alumnos.index') }}" class="btn btn-warning">Cancelar</a>
             </div>
 
         </div>

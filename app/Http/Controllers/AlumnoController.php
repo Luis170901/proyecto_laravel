@@ -16,13 +16,11 @@ class AlumnoController extends Controller
     public function index()
     {
         $campos = Schema::getColumnListing("alumnos");
-        $exclude=["created_at","updated_at"];
-        $campos= array_diff($campos,$exclude);
+        $exclude = ["created_at", "updated_at"];
+        $campos = array_diff($campos, $exclude);
         $filas = Alumno::select($campos)->get();
 
-       return view('alumnos.index', compact('filas',"campos"));
-
-        //
+        return view('alumnos.index', compact('filas', "campos"));
     }
 
     /**
@@ -31,7 +29,6 @@ class AlumnoController extends Controller
     public function create()
     {
         return view('alumnos.create');
-        //
     }
 
     /**
@@ -43,19 +40,24 @@ class AlumnoController extends Controller
         $alumno = new Alumno($datos);
         $alumno->save();
 
-        $alumno->idiomas()->destroy();
+        // No se puede usar destroy() en una relación HasMany
+        // $alumno->idiomas()->destroy();
+
+        // Solución: Usar delete() para eliminar registros relacionados
+        $alumno->idiomas()->delete();
+
+        // Si hay idiomas en la petición, los añadimos nuevamente
         if (request()->has("idiomas")) {
-            $idiomas=collect(request()->input('idiomas'));
+            $idiomas = collect(request()->input('idiomas'));
             $idiomas->each(fn($idioma) => $alumno->idiomas()->create([
-                "idioma"=>$idioma,
-                "nivel" =>request()->input("nivel")[$idioma],
-                "titulo"=>request()->input("titulo")[$idioma],
-            ])
-            );
-       }
-        session()->flash('mensaje','Alumno creado');
+                "idioma" => $idioma,
+                "nivel" => request()->input("nivel")[$idioma],
+                "titulo" => request()->input("titulo")[$idioma],
+            ]));
+        }
+
+        session()->flash('mensaje', 'Alumno creado');
         return redirect()->route('alumnos.index');
-        //
     }
 
     /**
@@ -64,7 +66,6 @@ class AlumnoController extends Controller
     public function show(Alumno $alumno)
     {
         return view('alumnos.show', compact('alumno'));
-        //
     }
 
     /**
@@ -72,8 +73,7 @@ class AlumnoController extends Controller
      */
     public function edit(Alumno $alumno)
     {
-        return view ('alumnos.edit', compact('alumno'));
-        //
+        return view('alumnos.edit', compact('alumno'));
     }
 
     /**
@@ -81,32 +81,32 @@ class AlumnoController extends Controller
      */
     public function update(UpdateAlumnoRequest $request, Alumno $alumno)
     {
-
         $datos = $request->only("nombre", "email", "edad");
         $alumno->update($datos);
-        $idiomas = $request->input("idiomas");
-        $niveles = $request->input("niveles");
-        $titulos = $request->input("titulos");
 
+        // ❌ ERROR: Se estaba intentando llamar destroy() sobre cada idioma, lo cual no existe
+        // collect($idiomas)->each(fn($idiomas) => $idioma->destroy());
 
-        collect($idiomas)->each(fn($idiomas)=>$idioma->destroy());
-        /*collect($idiomas)->each(fn($idioma)=>
-        $alumno->idiomas()
-            ->where("idioma",$idioma)
-            ->update([
-                "nivel" => $niveles[$idioma] ?? null,
-                "titulo" => $titulos[$idioma] ?? null
-            ])
-        );
-        */
-        session()->flash("mensaje", "alumno actualizado");
+        // ✅ SOLUCIÓN: Usar delete() para eliminar idiomas antes de añadir los nuevos
+        $alumno->idiomas()->delete();
+
+        // Si hay idiomas, los añadimos nuevamente
+        if ($request->has("idiomas")) {
+            $idiomas = $request->input("idiomas");
+            $niveles = $request->input("niveles");
+            $titulos = $request->input("titulos");
+
+            collect($idiomas)->each(fn($idioma) =>
+                $alumno->idiomas()->create([
+                    "idioma" => $idioma,
+                    "nivel" => $niveles[$idioma] ?? null,
+                    "titulo" => $titulos[$idioma] ?? null
+                ])
+            );
+        }
+
+        session()->flash("mensaje", "Alumno actualizado");
         return redirect()->route('alumnos.index');
-
-
-
-
-
-        //
     }
 
     /**
@@ -115,8 +115,7 @@ class AlumnoController extends Controller
     public function destroy(Alumno $alumno)
     {
         $alumno->delete();
-        session()->flash('mensaje','Alumno eliminado');
+        session()->flash('mensaje', 'Alumno eliminado');
         return redirect()->route('alumnos.index');
-        //
     }
 }

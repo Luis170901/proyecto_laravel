@@ -1,4 +1,3 @@
-
 <x-layouts.layout>
     <div class="flex flex-row justify-center items-center min-h-full bg-gray-300">
         <div class="bg-white p-3 rounded-2xl">
@@ -21,7 +20,7 @@
                     </div>
                     <div class="flex flex-row justify-between p-3">
                         <button class="btn btn-warning" type="submit">Guardar</button>
-                        <button class="btn btn-warning" type="submit">Cancelar</button>
+                        <button class="btn btn-secondary" type="button" onclick="window.history.back();">Cancelar</button>
 
                     </div>
                     </div>

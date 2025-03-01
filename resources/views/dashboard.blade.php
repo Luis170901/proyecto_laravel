@@ -12,6 +12,27 @@
                     {{ __("You're logged in!") }}
                 </div>
             </div>
+
+            <!-- Sección de Tarjetas -->
+            <div class="mt-6 grid grid-cols-2 gap-4">
+                <!-- Tarjeta de Alumnos -->
+                <div class="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-xl font-semibold">Alumnos</h2>
+                    <p class="text-gray-300">Visualizar Alumnos</p>
+                    <a href="{{ route('alumnos.index') }}" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded">
+                        Ver Alumnos
+                    </a>
+                </div>
+
+            <!-- Tarjeta de Proyectos -->
+            <div class="bg-gray-900 text-white p-6 rounded-lg shadow-lg">
+                 <h2 class="text-xl font-semibold">Proyectos</h2>
+                    <p class="text-gray-300">Gestionar Proyectos</p>
+                    <a href="{{ route('proyectos.index') }}" class="mt-4 inline-block bg-green-500 text-white px-4 py-2 rounded">
+                        Ver Proyectos
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>
